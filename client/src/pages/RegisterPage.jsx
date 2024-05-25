@@ -173,7 +173,7 @@ const RegisterPage = () => {
                 type="radio"
                 name="role"
                 value="buyer"
-                checked={formData.role === "buyer"}
+                checked={formData?.role === "buyer"}
                 onChange={handleChange}
               />
               Buyer
@@ -183,7 +183,7 @@ const RegisterPage = () => {
                 type="radio"
                 name="role"
                 value="seller"
-                checked={formData.role === "seller"}
+                checked={formData?.role === "seller"}
                 onChange={handleChange}
               />
               Seller

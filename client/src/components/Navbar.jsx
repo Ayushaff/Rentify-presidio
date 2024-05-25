@@ -40,7 +40,7 @@ const Navbar = () => {
       </div>
 
       <div className="navbar_right">
-        {user && user.role === "seller" ? (
+        {user && user?.role === "seller" ? (
           <a href="/create-listing" className="host">
             Hi Seller Click to Rent/Sell your property
           </a>
@@ -78,7 +78,7 @@ const Navbar = () => {
           </div>
         )}
 
-        {dropdownMenu && user.role === "buyer" && (
+        {dropdownMenu && user?.role === "buyer" && (
           <div className="navbar_right_accountmenu">
             <Link to={`/${user._id}/trips`}>Booked list</Link>
             <Link to={`/${user._id}/wishList`}>Wish List</Link>
@@ -94,7 +94,7 @@ const Navbar = () => {
           </div>
         )}
 
-        {dropdownMenu && user.role === "seller" && (
+        {dropdownMenu && user?.role === "seller" && (
           <div className="navbar_right_accountmenu">
             <Link to={`/${user._id}/properties`}>Property List</Link>
             <Link to="/create-listing">Rent your property</Link>

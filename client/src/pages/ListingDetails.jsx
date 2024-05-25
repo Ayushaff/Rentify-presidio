@@ -166,7 +166,7 @@ const ListingDetails = () => {
 
 
           {
-            user.role==="buyer" &&
+            user?.role==="buyer" &&
           <div>
 
             <h2>How long do you want to stay?</h2>
