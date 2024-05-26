@@ -5,6 +5,7 @@ import ListingCard from "./ListingCard";
 import Loader from "./Loader";
 import { useDispatch, useSelector } from "react-redux";
 import { setListings } from "../redux/state";
+import { baseUrl } from "../api/api";
 
 const Listings = () => {
   const dispatch = useDispatch();
@@ -18,8 +19,8 @@ const Listings = () => {
     try {
       const response = await fetch(
         selectedCategory !== "All"
-          ? `http://localhost:3001/properties?category=${selectedCategory}`
-          : "http://localhost:3001/properties",
+          ? `${baseUrl}/properties?category=${selectedCategory}`
+          : "${baseUrl}/properties",
         {
           method: "GET",
         }

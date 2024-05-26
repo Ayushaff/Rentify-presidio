@@ -12,7 +12,7 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 import { setListings } from "../redux/state";
-
+import {baseUrl} from "../api/api";
 const CreateListing = () => {
   const [category, setCategory] = useState("");
   const [type, setType] = useState("");
@@ -136,7 +136,7 @@ const CreateListing = () => {
 
 
       /* Send a POST request to server */
-      const response = await fetch("http://localhost:3001/properties/create", {
+      const response = await fetch(`${baseUrl}/properties/create`, {
         method: "POST",
         body: listingForm,
       });
