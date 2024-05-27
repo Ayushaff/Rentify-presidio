@@ -1,5 +1,6 @@
 import { categories } from "../data";
 import "../styles/Categories.scss"
+
 import { Link } from "react-router-dom";
 
 const Categories = () => {

@@ -17,7 +17,7 @@ const corsOptions = {
         if (!origin || allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);
         } else {
-            callback(new Error('Not allowed by CORS'));
+            callback(new Error('Not allowed by CORS'));n
         }
     }
 };
@@ -33,6 +33,7 @@ app.use("/auth", authRoutes)
 app.use("/properties", listingRoutes)
 app.use("/bookings", bookingRoutes)
 app.use("/users", userRoutes)
+app.use("/listings", listingRoutes)
 
 /* MONGOOSE SETUP */
 const PORT = 3001;

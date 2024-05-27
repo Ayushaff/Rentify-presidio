@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setReservationList } from "../redux/state";
 import ListingCard from "../components/ListingCard";
 import Footer from "../components/Footer"
+import {baseUrl} from "../api/api"
 
 const ReservationList = () => {
   const [loading, setLoading] = useState(true);

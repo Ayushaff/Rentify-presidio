@@ -40,11 +40,11 @@ router.patch("/:userId/:listingId", async (req, res) => {
     if (favoriteListing) {
       user.wishList = user.wishList.filter((item) => item._id.toString() !== listingId)
       await user.save()
-      res.status(200).json({ message: "Listing is removed from wish list", wishList: user.wishList})
+      res.status(200).json({ message: "Listing is removed from wish list", wishList: user.wishList })
     } else {
       user.wishList.push(listing)
       await user.save()
-      res.status(200).json({ message: "Listing is added to wish list", wishList: user.wishList})
+      res.status(200).json({ message: "Listing is added to wish list", wishList: user.wishList })
     }
   } catch (err) {
     console.log(err)
@@ -53,16 +53,40 @@ router.patch("/:userId/:listingId", async (req, res) => {
 })
 
 /* GET PROPERTY LIST */
-router.get("/:userId/properties", async (req, res) => {
+// router.get("/:userId/properties", async (req, res) => {
+//   try {
+//     const { userId } = req.params
+//     const properties = await Listing.find({ creator: userId }).populate("creator")
+//     res.status(202).json(properties)
+//   } catch (err) {
+//     console.log(err)
+//     res.status(404).json({ message: "Can not find properties!", error: err.message })
+//   }
+// })
+
+router.get('/:userId/properties', async (req, res) => {
+  const { userId } = req.params;
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+
   try {
-    const { userId } = req.params
-    const properties = await Listing.find({ creator: userId }).populate("creator")
-    res.status(202).json(properties)
-  } catch (err) {
-    console.log(err)
-    res.status(404).json({ message: "Can not find properties!", error: err.message })
+    const properties = await Listing.find({ creator: userId })
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    const totalProperties = await Listing.countDocuments({ creator: userId });
+    const totalPages = Math.ceil(totalProperties / limit);
+
+    res.json({
+      properties,
+      totalPages,
+    });
+  } catch (error) {
+    console.error('Error fetching properties:', error);
+    res.status(500).json({ message: 'Error fetching properties', error: error.message });
   }
-})
+});
+
 
 /* GET RESERVATION LIST */
 router.get("/:userId/reservations", async (req, res) => {

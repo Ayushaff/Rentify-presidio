@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import "../styles/ListingDetails.scss";
 import { useNavigate, useParams } from "react-router-dom";
 import { facilities } from "../data";
-
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 import { DateRange } from "react-date-range";
@@ -11,13 +10,17 @@ import Navbar from "../components/Navbar";
 import { useSelector } from "react-redux";
 import Footer from "../components/Footer";
 import { baseUrl } from "../api/api";
+import { Button } from "@mui/material";
+import axios from "axios";
 
 const ListingDetails = () => {
   const [loading, setLoading] = useState(true);
   const user = useSelector((state) => state.user);
+  const creatorId = user?._id;
 
   const { listingId } = useParams();
   const [listing, setListing] = useState(null);
+  const [error, setError] = useState(null);
 
   const getListingDetails = async () => {
     try {
@@ -37,9 +40,6 @@ const ListingDetails = () => {
     getListingDetails();
   }, []);
 
-  console.log(listing);
-
-  /* BOOKING CALENDAR */
   const [dateRange, setDateRange] = useState([
     {
       startDate: new Date(),
@@ -49,17 +49,14 @@ const ListingDetails = () => {
   ]);
 
   const handleSelect = (ranges) => {
-    // Update the selected date range when user makes a selection
     setDateRange([ranges.selection]);
   };
 
   const start = new Date(dateRange[0].startDate);
   const end = new Date(dateRange[0].endDate);
-  const dayCount = Math.round(end - start) / (1000 * 60 * 60 * 24); // Calculate the difference in day unit
+  const dayCount = Math.round((end - start) / (1000 * 60 * 60 * 24));
 
-  /* SUBMIT BOOKING */
   const customerId = useSelector((state) => state?.user?._id);
-
   const navigate = useNavigate();
 
   const handleSubmit = async () => {
@@ -67,7 +64,7 @@ const ListingDetails = () => {
       const bookingForm = {
         customerId,
         listingId,
-        hostId: listing.creator._id,
+        hostId: listing?.creator?._id,
         startDate: dateRange[0].startDate.toDateString(),
         endDate: dateRange[0].endDate.toDateString(),
         totalPrice: listing.price * dayCount,
@@ -89,20 +86,40 @@ const ListingDetails = () => {
     }
   };
 
+  const handleDeleteListing = async () => {
+    try {
+      const response = await axios.delete(`${baseUrl}/listings/${listingId}`, {
+        data: {
+          creator: creatorId,
+        },
+      });
+      if (response.status === 200) {
+        navigate(`/${customerId}/properties`);
+      } else {
+        setError("Failed to delete listing, please try again");
+      }
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  if (!listing) {
+    return <p>Nothing to see here</p>;
+  }
+
   return loading ? (
     <Loader />
   ) : (
     <>
       <Navbar />
-
       <div className="listing-details">
         <div className="title">
-          <h1>{listing.title}</h1>
+          <h1>{listing?.title}</h1>
           <div></div>
         </div>
 
         <div className="photos">
-          {listing.listingPhotoPaths?.map((item) => (
+          {listing?.listingPhotoPaths?.map((item) => (
             <img
               src={`${baseUrl}/${item.replace("public", "")}`}
               alt="listing photo"
@@ -111,12 +128,12 @@ const ListingDetails = () => {
         </div>
 
         <h2>
-          {listing.type} in {listing.city}, {listing.province},{" "}
-          {listing.country}
+          {listing?.type} in {listing?.city}, {listing?.province},{" "}
+          {listing?.country}
         </h2>
         <p>
-          {listing.guestCount} guests - {listing.bedroomCount} bedroom(s) -{" "}
-          {listing.bedCount} bed(s) - {listing.bathroomCount} bathroom(s)
+          {listing?.guestCount} guests - {listing?.bedroomCount} bedroom(s) -{" "}
+          {listing?.bedCount} bed(s) - {listing?.bathroomCount} bathroom(s)
         </p>
         <hr />
 
@@ -145,7 +162,7 @@ const ListingDetails = () => {
           <div>
             <h2>What this place offers?</h2>
             <div className="amenities">
-              {listing.amenities[0].split(",").map((item, index) => (
+              {listing?.amenities[0].split(",").map((item, index) => (
                 <div className="facility" key={index}>
                   <div className="facility_icon">
                     {
@@ -158,46 +175,81 @@ const ListingDetails = () => {
               ))}
             </div>
           </div>
-          {user?.role === "buyer" && (
-            <a href={`mailto:${listing?.creator?.email}`}>
-              <button className="button">Contact Host</button>
-            </a>
-          )}
 
           {user?.role === "buyer" && (
-            <div>
-              <h2>How long do you want to stay?</h2>
+            <>
+              <div className="listing-details_buttons">
+                <a href={`mailto:${listing?.creator?.email}`}>
+                  <Button
+                    className="button"
+                    syle={{ width: "200px", height: "50px", margin: "10px" }}
+                    variant="contained"
+                    color="success"
+                    size="medium"
+                  >
+                    Contact Host
+                  </Button>
+                </a>
+              </div>
+
               <div className="date-range-calendar">
+                <h2>How long do you want to stay?</h2>
                 <DateRange ranges={dateRange} onChange={handleSelect} />
-                {dayCount > 1 ? (
-                  <h2>
-                    ${listing.price} x {dayCount} nights
-                  </h2>
-                ) : (
-                  <h2>
-                    ${listing.price} x {dayCount} night
-                  </h2>
-                )}
-
-                <h2>Total price: ${listing.price * dayCount}</h2>
+                <h2>
+                  ${listing?.price} x {dayCount}{" "}
+                  {dayCount > 1 ? "nights" : "night"}
+                </h2>
+                <h2>Total price: ${listing?.price * dayCount}</h2>
                 <p>Start Date: {dateRange[0].startDate.toDateString()}</p>
                 <p>End Date: {dateRange[0].endDate.toDateString()}</p>
-
                 <button className="button" type="submit" onClick={handleSubmit}>
                   BOOKING
                 </button>
               </div>
-            </div>
+            </>
           )}
 
-          {
-            user.role === "seller" && (
-              <button onClick={() => navigate(`/update-listing/${listingId}` )} style={{width: "10%", height: "50px"}}>Update Listing</button>
-            )
-          }
+          {user?.role === "seller" && (
+            <div
+              className="listing-details_buttons"
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                flexWrap: "wrap",
+                justifyContent: "center",
+                alignContent: "center",
+                gap: "50px",
+                margin: "10px",
+                marginLeft: "30px",
+                padding: "20px",
+                width: "100%",
+                height: "50px",
+                textAlign: "center",
+              }}
+            >
+              <Button
+                onClick={() => navigate(`/update/${listingId}`)}
+                style={{ width: "28%", height: "50px", margin: "10px" }}
+                variant="contained"
+                color="success"
+                size="large"
+              >
+                Update Listing
+              </Button>
+              <Button
+                onClick={handleDeleteListing}
+                style={{ width: "28%", height: "50px", margin: "10px" }}
+                variant="contained"
+                color="error"
+                size="large"
+              >
+                Delete Listing
+              </Button>
+            </div>
+          )}
+          {error && <p style={{ color: "red" }}>{error}</p>}
         </div>
       </div>
-
       <Footer />
     </>
   );

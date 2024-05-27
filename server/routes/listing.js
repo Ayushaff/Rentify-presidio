@@ -82,52 +82,76 @@ router.post("/create", upload.array("listingPhotos"), async (req, res) => {
 
 /* GET lISTINGS BY CATEGORY */
 router.get("/", async (req, res) => {
-  const qCategory = req.query.category
+  const qCategory = req.query.category;
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
 
   try {
-    let listings
-    if (qCategory) {
-      listings = await Listing.find({ category: qCategory }).populate("creator")
-    } else {
-      listings = await Listing.find().populate("creator")
-    }
+    let listings;
+    const query = qCategory ? { category: qCategory } : {};
 
-    res.status(200).json(listings)
+    listings = await Listing.find(query)
+      .populate("creator")
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    const totalListings = await Listing.countDocuments(query);
+    const totalPages = Math.ceil(totalListings / limit);
+
+    res.status(200).json({ listings, totalPages });
   } catch (err) {
-    res.status(404).json({ message: "Fail to fetch listings", error: err.message })
-    console.log(err)
+    res.status(500).json({ message: "Fail to fetch listings", error: err.message });
+    console.log(err);
   }
-})
+});
 
-/* GET LISTINGS BY SEARCH */
+/* GET LISTINGS BY listed*/
+
+
 router.get("/search/:search", async (req, res) => {
-  const { search } = req.params
+  const { search } = req.params;
+  const page = parseInt(req.query.page) || 1; // Default to page 1 if not specified
+  const limit = parseInt(req.query.limit) || 10; // Default to 10 items per page
 
   try {
-    let listings = []
+    let query = {};
 
-    if (search === "all") {
-      listings = await Listing.find().populate("creator")
-    } else {
-      listings = await Listing.find({
+    // Modify the query based on the search term
+    if (search !== "all") {
+      query = {
         $or: [
-          { category: {$regex: search, $options: "i" } },
-          { title: {$regex: search, $options: "i" } },
-        ]
-      }).populate("creator")
+          { category: { $regex: search, $options: "i" } },
+          { title: { $regex: search, $options: "i" } },
+        ],
+      };
     }
 
-    res.status(200).json(listings)
+    // Get total count of listings matching the search criteria
+    const totalListingsCount = await Listing.countDocuments(query);
+
+    // Calculate total number of pages
+    const totalPages = Math.ceil(totalListingsCount / limit);
+
+    // Fetch paginated listings based on the query and pagination parameters
+    const listings = await Listing.find(query)
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .populate("creator");
+
+    // Return paginated listings and total number of pages in the response
+    res.status(200).json({ listings, totalPages });
   } catch (err) {
-    res.status(404).json({ message: "Fail to fetch listings", error: err.message })
-    console.log(err)
+    // Handle errors
+    res.status(500).json({ message: "Failed to fetch listings", error: err.message });
+    console.error("Error fetching listings:", err);
   }
-})
+});
 
 /* LISTING DETAILS */
 router.get("/:listingId", async (req, res) => {
   try {
     const { listingId } = req.params
+    console.log("listingId in back", listingId)
     const listing = await Listing.findById(listingId).populate("creator")
     res.status(202).json(listing)
   } catch (err) {
@@ -158,8 +182,9 @@ router.put("/update/:listingId", upload.array("listingPhotos"), async (req, res)
     };
 
     // Update listing photos if new ones are provided
-    if (req.files) {
-      updatedListing.listingPhotoPaths = req.files.map((file) => file.path);
+    if (req.files && req.files.length > 0) {
+      // Append new photo paths to the existing ones
+      updatedListing.listingPhotoPaths.push(...req.files.map((file) => file.path));
     }
 
     // Save the updated listing
@@ -171,22 +196,28 @@ router.put("/update/:listingId", upload.array("listingPhotos"), async (req, res)
   }
 });
 
+
 /* DELETE LISTING */
-router.delete("/delete/:listingId", async (req, res) => {
+router.delete("/:listingId", async (req, res) => {
   try {
     const { listingId } = req.params;
+    const { creator } = req.body;
+    console.log("creator", creator)
 
     // Find the listing by ID
     const listing = await Listing.findById(listingId);
+   console.log("listing", listing)
+   console.log("listingId", listingId)
 
     if (!listing) {
       return res.status(404).json({ message: "Listing not found" });
     }
 
     // Check if the user is the creator of the listing
-    if (listing.creator.toString() !== req.body.creator) {
+    if (listing.creator.toString() !== creator) {
+      console.log("listing.creator", listing.creator)
       return res.status(401).json({ message: "Unauthorized to delete this listing" });
-    }
+    }``
 
     // Delete the listing
     await Listing.findByIdAndDelete(listingId);
@@ -194,6 +225,31 @@ router.delete("/delete/:listingId", async (req, res) => {
     res.status(200).json({ message: "Listing deleted successfully" });
   } catch (err) {
     res.status(500).json({ message: "Failed to delete listing", error: err.message });
+  }
+});
+
+router.delete('/delete-photo/:listingId', async (req, res) => {
+  const { listingId } = req.params;
+  const { photoPath } = req.body;
+
+  try {
+    // Find the listing by ID
+    const listing = await Listing.findById(listingId);
+
+    if (!listing) {
+      return res.status(404).json({ error: 'Listing not found' });
+    }
+
+    // Remove the photoPath from the listing's listingPhotoPaths array
+    listing.listingPhotoPaths = listing.listingPhotoPaths.filter(path => path !== photoPath);
+
+    // Save the updated listing
+    await listing.save();
+
+    res.status(200).json({ message: 'Photo deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting photo:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

@@ -45,6 +45,7 @@ const ListingCard = ({
   /* ADD TO WISHLIST */
   const user = useSelector((state) => state.user);
   const wishList = user?.wishList || [];
+  console.log("wishList", wishList)
 
   const isLiked = wishList?.find((item) => item?._id === listingId);
 

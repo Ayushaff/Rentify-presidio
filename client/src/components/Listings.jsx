@@ -12,47 +12,49 @@ const Listings = () => {
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const listingsPerPage = 3;
 
   const listings = useSelector((state) => state.listings);
-  // const user = useSelector((state) => state.user);
-  // const propertyList = user?.propertyList;
-  
-  const getFeedListings = async () => {
+
+  const getFeedListings = async (page = 1, category = "All") => {
     try {
       const response = await fetch(
-        selectedCategory !== "All"
-          ? `${baseUrl}/properties?category=${selectedCategory}`
-          : `${baseUrl}/properties`,
+        category !== "All"
+          ? `${baseUrl}/properties?category=${category}&page=${page}&limit=${listingsPerPage}`
+          : `${baseUrl}/properties?page=${page}&limit=${listingsPerPage}`,
         {
           method: "GET",
         }
       );
+      console.log(selectedCategory);
+
 
       const data = await response.json();
-      dispatch(setListings({ listings: data }));
+      dispatch(setListings({ listings: data.listings }));
+      setTotalPages(data.totalPages);
       setLoading(false);
     } catch (err) {
       console.log("Fetch Listings Failed", err.message);
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    getFeedListings();
-  }, [selectedCategory]);
+    getFeedListings(currentPage, selectedCategory);
+  }, [selectedCategory, currentPage]);
 
   const handleClickNext = () => {
-    setCurrentPage((prevPage) => prevPage + 1);
+    if (currentPage < totalPages) {
+      setCurrentPage((prevPage) => prevPage + 1);
+    }
   };
 
   const handleClickPrev = () => {
-    setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
+    if (currentPage > 1) {
+      setCurrentPage((prevPage) => prevPage - 1);
+    }
   };
-
-  const currentListings = listings?.slice(
-    (currentPage - 1) * listingsPerPage,
-    currentPage * listingsPerPage
-  );
 
   return (
     <>
@@ -75,55 +77,59 @@ const Listings = () => {
       {loading ? (
         <Loader />
       ) : (
-        
         <div className="listings">
-          {currentListings?.length>0 ? (
-            currentListings.map(
-            ({
-              _id,
-              creator,
-              listingPhotoPaths,
-              city,
-              province,
-              country,
-              category,
-              type,
-              price,
-              booking = false,
-            }) => (
-              <ListingCard
-                key={_id}
-                listingId={_id}
-                creator={creator}
-                listingPhotoPaths={listingPhotoPaths}
-                city={city}
-                province={province}
-                country={country}
-                category={category}
-                type={type}
-                price={price}
-                booking={booking}
-              />
+          {listings?.length > 0 ? (
+            listings.map(
+              ({
+                _id,
+                creator,
+                listingPhotoPaths,
+                city,
+                province,
+                country,
+                category,
+                type,
+                price,
+                booking = false,
+              }) => (
+                <ListingCard
+                  key={_id}
+                  listingId={_id}
+                  creator={creator}
+                  listingPhotoPaths={listingPhotoPaths}
+                  city={city}
+                  province={province}
+                  country={country}
+                  category={category}
+                  type={type}
+                  price={price}
+                  booking={booking}
+                />
+              )
             )
-          )
-        ) : (
-          <p>No more listings available.</p>
-        )}
-      </div>
-    )}
-      
-      <div className="pagination" style={{ display: "flex", justifyContent: "center" }}>
-        <button onClick={handleClickPrev} disabled={currentPage === 1} >
-          Previous
-        </button>
-        {currentPage}
-        <button
-          onClick={handleClickNext}
-          disabled={currentListings?.length < listingsPerPage}
-        >
-          Next
-        </button>
-      </div>
+          ) : (
+            <p>No more listings available.</p>
+          )}
+        </div>
+      )}
+
+       
+       {
+        listings?.length > 0 && (
+          <div className="pagination" style={{ display: "flex", justifyContent: "center" }}>
+            <button onClick={handleClickPrev} disabled={currentPage === 1}>
+              Previous
+            </button>
+            <span>{currentPage} of {totalPages}</span>
+            <button
+              onClick={handleClickNext}
+              disabled={currentPage >= totalPages}
+            >
+              Next
+            </button>
+          </div>
+        )
+       }
     </>
   );
 };
