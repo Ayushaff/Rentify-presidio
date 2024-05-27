@@ -42,6 +42,7 @@ const TripList = () => {
       <Navbar />
       <h1 className="title-list">Your booked rooms</h1>
       <div className="list">
+        {tripList?.length === 0 && <p>Nothing in your Booking List yet</p>}
         {tripList?.map(({ listingId, hostId, startDate, endDate, totalPrice, booking=true }) => (
           <ListingCard
             listingId={listingId._id}

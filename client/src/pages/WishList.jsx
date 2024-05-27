@@ -12,6 +12,7 @@ const WishList = () => {
       <Navbar />
       <h1 className="title-list">Your Wish List</h1>
       <div className="list">
+        {wishList?.length === 0 && <p>Nothing in your wish list yet</p>}
         {wishList?.map(
           ({
             _id,

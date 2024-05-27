@@ -75,8 +75,9 @@ const RegisterPage = () => {
         navigate("/login");
         setError("");
       } else  {
-        const errorData = await response.json();
-        setError(errorData.message || 'Registration failed');
+        
+        console.log("Registration failed ekse:", response.error.message);
+        setError(response.error.message);
       }
     } catch (err) {
       console.log("Registration failed cat:", err.message);
