@@ -14,7 +14,6 @@ const Listings = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const listingsPerPage = 3;
-
   const listings = useSelector((state) => state.listings);
 
   const getFeedListings = async (page = 1, category = "All") => {

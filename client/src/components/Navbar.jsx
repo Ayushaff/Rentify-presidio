@@ -99,7 +99,7 @@ const Navbar = () => {
       </div>
 
       <div className="navbar_right">
-        {user && user?.role === "seller" ? (
+        {/* {user && user?.role === "seller" ? (
           <a href="/create-listing" className="host">
             Hi Seller Click to Rent/Sell your property
           </a>
@@ -109,7 +109,7 @@ const Navbar = () => {
               Hi Buyer
             </a>
           )
-        )}
+        )} */}
 
         <button
           className="navbar_right_account"

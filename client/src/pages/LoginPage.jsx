@@ -73,7 +73,7 @@ const LoginPage = () => {
 
 
         </form>
-        <a href="/register">Don't have an account? Sign In Here</a>
+        {/* <a href="/register">Don't have an account? Sign In Here</a> */}
       </div>
     </div>
   );

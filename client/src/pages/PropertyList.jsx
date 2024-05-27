@@ -21,9 +21,12 @@ const PropertyList = () => {
   const getPropertyList = async (page = 1) => {
     setLoading(true); // Set loading to true when fetching data
     try {
-      const response = await fetch(`${baseUrl}/users/${user._id}/properties?page=${page}&limit=10`, {
-        method: "GET",
-      });
+      const response = await fetch(
+        `${baseUrl}/users/${user._id}/properties?page=${page}&limit=10`,
+        {
+          method: "GET",
+        }
+      );
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
@@ -64,7 +67,7 @@ const PropertyList = () => {
     <>
       <Navbar />
       <h1 className="title-list">Your Property List</h1>
-      <div className="list">
+      <div className="list" style={{minHeight: "60vh"}}>
         {propertyList.length > 0 ? (
           propertyList.map(
             ({
@@ -98,15 +101,22 @@ const PropertyList = () => {
           <p>No properties found.</p>
         )}
       </div>
-      <div className="pagination">
-        <button onClick={handlePreviousPage} disabled={currentPage === 1}>
-          Previous
-        </button>
-        <span>{currentPage} of {totalPages}</span>
-        <button onClick={handleNextPage} disabled={currentPage === totalPages}>
-          Next
-        </button>
-      </div>
+      {propertyList.length > 0 && totalPages > 1 && (
+        <div className="pagination">
+          <button onClick={handlePreviousPage} disabled={currentPage === 1}>
+            Previous
+          </button>
+          <span>
+            {currentPage} of {totalPages}
+          </span>
+          <button
+            onClick={handleNextPage}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </button>
+        </div>
+      )}
       <Footer />
     </>
   );

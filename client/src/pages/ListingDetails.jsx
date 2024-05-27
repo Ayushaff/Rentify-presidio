@@ -15,24 +15,33 @@ import axios from "axios";
 
 const ListingDetails = () => {
   const [loading, setLoading] = useState(true);
-  const user = useSelector((state) => state.user);
-  const creatorId = user?._id;
-
-  const { listingId } = useParams();
   const [listing, setListing] = useState(null);
   const [error, setError] = useState(null);
+  const user = useSelector((state) => state.user);
+  const creatorId = user?._id;
+  const { listingId } = useParams();
+  const customerId = useSelector((state) => state?.user?._id);
+  const navigate = useNavigate();
 
   const getListingDetails = async () => {
     try {
+      setError(null);
+      setLoading(true);
       const response = await fetch(`${baseUrl}/properties/${listingId}`, {
         method: "GET",
       });
-
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      if (response.status === 404) {
+        throw new Error("Listing not found");
+      }
       const data = await response.json();
       setListing(data);
-      setLoading(false);
     } catch (err) {
-      console.log("Fetch Listing Details Failed", err.message);
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -55,9 +64,6 @@ const ListingDetails = () => {
   const start = new Date(dateRange[0].startDate);
   const end = new Date(dateRange[0].endDate);
   const dayCount = Math.round((end - start) / (1000 * 60 * 60 * 24));
-
-  const customerId = useSelector((state) => state?.user?._id);
-  const navigate = useNavigate();
 
   const handleSubmit = async () => {
     try {
@@ -88,6 +94,8 @@ const ListingDetails = () => {
 
   const handleDeleteListing = async () => {
     try {
+      setError(null);
+      setLoading(true);
       const response = await axios.delete(`${baseUrl}/listings/${listingId}`, {
         data: {
           creator: creatorId,
@@ -100,16 +108,24 @@ const ListingDetails = () => {
       }
     } catch (err) {
       setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (!listing) {
-    return <p>Nothing to see here</p>;
+  if (loading) {
+    return <Loader />;
   }
 
-  return loading ? (
-    <Loader />
-  ) : (
+  if (error) {
+    return <p style={{ color: "red" }}>{error}</p>;
+  }
+
+  if (!listing) {
+    return <p>No listing found.</p>;
+  }
+
+  return (
     <>
       <Navbar />
       <div className="listing-details">
@@ -119,8 +135,9 @@ const ListingDetails = () => {
         </div>
 
         <div className="photos">
-          {listing?.listingPhotoPaths?.map((item) => (
+          {listing?.listingPhotoPaths?.map((item, index) => (
             <img
+              key={index}
               src={`${baseUrl}/${item.replace("public", "")}`}
               alt="listing photo"
             />
@@ -182,7 +199,7 @@ const ListingDetails = () => {
                 <a href={`mailto:${listing?.creator?.email}`}>
                   <Button
                     className="button"
-                    syle={{ width: "200px", height: "50px", margin: "10px" }}
+                    style={{ width: "200px", height: "50px", margin: "10px" }}
                     variant="contained"
                     color="success"
                     size="medium"
@@ -247,7 +264,6 @@ const ListingDetails = () => {
               </Button>
             </div>
           )}
-          {error && <p style={{ color: "red" }}>{error}</p>}
         </div>
       </div>
       <Footer />
