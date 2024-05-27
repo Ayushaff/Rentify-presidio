@@ -9,12 +9,17 @@ const listingRoutes = require("./routes/listing.js")
 const bookingRoutes = require("./routes/booking.js")
 const userRoutes = require("./routes/user.js")
 
-app.use(cors());
+app.use(cors(
+  {
+    origin: "https://rentify-presidio-4gxy.vercel.app/",
+    credentials: true
+  }
+));
 app.use(express.json());
 app.use(express.static("public"));
 
 /* ROUTES */
-app.use("/", (req, res) => res.json({ message: "Hello World" }));
+// app.use("/", (req, res) => res.json({ message: "Hello World" }));
 app.use("/auth", authRoutes)
 app.use("/properties", listingRoutes)
 app.use("/bookings", bookingRoutes)
@@ -23,11 +28,7 @@ app.use("/users", userRoutes)
 /* MONGOOSE SETUP */
 const PORT = 3001;
 mongoose
-  .connect(process.env.MONGO_URL, {
-    dbName: "RealState",
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(process.env.MONGO_URL)
   .then(() => {
     app.listen(PORT, () => console.log(`Server Port: ${PORT}`));
   })
