@@ -1,11 +1,14 @@
-import "../styles/Footer.scss"
-import { LocationOn, LocalPhone, Email } from "@mui/icons-material"
+import "../styles/Footer.scss";
+import { LocationOn, LocalPhone, Email } from "@mui/icons-material";
 const Footer = () => {
   return (
     <div className="footer">
       <div className="footer_left">
-        <a href="/"><img src="/assets/image.png" alt="logo" /></a>
-      </div>
+  <a href="/">
+    <img src="/assets/image.png" alt="logo" />
+  </a>
+  
+</div>
 
       <div className="footer_center">
         <h3>Useful Links</h3>
@@ -29,7 +32,7 @@ const Footer = () => {
         <img src="/assets/payment.png" alt="payment" />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Footer
+export default Footer;

@@ -56,10 +56,10 @@ const SearchPage = () => {
   return (
     <>
       <Navbar />
-      <h1 className="title-list">{search}</h1>
+      <h1 className="title-list" >{search}</h1>
       <div className="list">
         {listings?.length === 0 ? (
-          <h1 className="no-listings" style={{ textAlign: "center", marginTop: "50px", color: "red", fontWeight: "bold", fontSize: "30px" }}>No listings found</h1>
+          <h1 className="no-listings" style={{minHeight: "40vh", textAlign: "center", marginTop: "50px", color: "red", fontWeight: "bold", fontSize: "30px" }}>No listings found</h1>
         ) : (
           listings?.map(
             ({
@@ -91,15 +91,20 @@ const SearchPage = () => {
           )
         )}
       </div>
-      <div className="pagination" style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}>
-        <button onClick={handlePreviousPage} disabled={currentPage === 1}>
-          Previous
-        </button>
-        <span style={{ margin: "0 10px" }}>{currentPage} of {totalPages}</span>
-        <button onClick={handleNextPage} disabled={currentPage === totalPages}>
-          Next
-        </button>
-      </div>
+      {
+        listings?.length > 0 && (
+          <div className="pagination" style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}>
+            <button onClick={handlePreviousPage} disabled={currentPage === 1}>
+              Previous
+            </button>
+            <span style={{ margin: "0 10px" }}>{currentPage} of {totalPages}</span>
+            <button onClick={handleNextPage} disabled={currentPage <= totalPages}>
+              Next
+            </button>
+          </div>
+        )
+      }
+
       <Footer />
     </>
   );
