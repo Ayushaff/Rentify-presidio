@@ -9,12 +9,21 @@ const listingRoutes = require("./routes/listing.js")
 const bookingRoutes = require("./routes/booking.js")
 const userRoutes = require("./routes/user.js")
 
-app.use(cors(
-  {
-    origin: ["https://rentify-presidio-4gxy.vercel.app, http://localhost:3000"],
-    credentials: true
-  }
-));
+const allowedOrigins = ['http://localhost:3000', 'https://rentify-presidio-4gxy.vercel.app'];
+
+// Configure CORS options
+const corsOptions = {
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    }
+};
+
+// Use CORS middleware
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.static("public"));
 
