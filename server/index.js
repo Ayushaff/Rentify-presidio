@@ -28,7 +28,7 @@ app.use(express.json());
 app.use(express.static("public"));
 
 /* ROUTES */
-// app.use("/", (req, res) => res.json({ message: "Hello World" }));
+app.use("/", (req, res) => res.json({ message: "Hello World" }));
 app.use("/auth", authRoutes)
 app.use("/properties", listingRoutes)
 app.use("/bookings", bookingRoutes)
