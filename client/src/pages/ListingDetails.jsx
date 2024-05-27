@@ -204,7 +204,7 @@ const ListingDetails = () => {
                     color="success"
                     size="medium"
                   >
-                    Contact Host
+                    Contact Seller
                   </Button>
                 </a>
               </div>
@@ -264,6 +264,9 @@ const ListingDetails = () => {
               </Button>
             </div>
           )}
+          {
+            !user?.role && <Button onClick={() => navigate("/login")} style={{cursor: "pointer" , width: "250px", height: "50px", margin: "10px" ,}} variant="text" color="success" size="medium"  >Log in to contact seller</Button>
+          }
         </div>
       </div>
       <Footer />
