@@ -5,7 +5,7 @@ import { baseUrl } from "../api/api";
 
 const RegisterPage = () => {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState("asd");
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -70,15 +70,16 @@ const RegisterPage = () => {
         body: register_form,
       });
 
-      if (response.ok) {
+      if (response.status === 200) {
+        console.log("Registration successful");
         navigate("/login");
         setError("");
-      } else {
-        console.log("Registration failed:", response.statusText);
-        setError(response.error.message);
+      } else  {
+        const errorData = await response.json();
+        setError(errorData.message || 'Registration failed');
       }
     } catch (err) {
-      console.log("Registration failed:", err.message);
+      console.log("Registration failed cat:", err.message);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -136,6 +137,30 @@ const RegisterPage = () => {
             required
           />
 
+          
+<div className="register_content_form_role">
+            <label>
+              <input
+                type="radio"
+                name="role"
+                value="buyer"
+                checked={formData?.role === "buyer"}
+                onChange={handleChange}
+              />
+              Buyer
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="role"
+                value="seller"
+                checked={formData?.role === "seller"}
+                onChange={handleChange}
+              />
+              Seller
+            </label>
+          </div>
+
           {!passwordMatch && (
             <p style={{ color: "red" }}>Passwords do not match!</p>
           )}
@@ -168,34 +193,12 @@ const RegisterPage = () => {
             />
           )}
 
-          <div className="register_content_form_role">
-            <label>
-              <input
-                type="radio"
-                name="role"
-                value="buyer"
-                checked={formData?.role === "buyer"}
-                onChange={handleChange}
-              />
-              Buyer
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="role"
-                value="seller"
-                checked={formData?.role === "seller"}
-                onChange={handleChange}
-              />
-              Seller
-            </label>
-          </div>
 
           <button type="submit" disabled={!passwordMatch || loading}>
             {loading ? "Loading...Please wait" : "REGISTER"}
           </button>
 
-          {error && <p style={{ color: "red" }}>{error}</p>}
+          {error  && <p style={{ color: "red" }}>{error.message}</p>}
         </form>
         <Link to="/login">Already have an account? Log In Here</Link>
       </div>
