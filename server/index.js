@@ -11,7 +11,7 @@ const userRoutes = require("./routes/user.js")
 
 app.use(cors(
   {
-    origin: "https://rentify-presidio-4gxy.vercel.app/",
+    origin: ["https://rentify-presidio-4gxy.vercel.app, http://localhost:3000"],
     credentials: true
   }
 ));
