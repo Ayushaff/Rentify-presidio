@@ -8,6 +8,8 @@ import { baseUrl } from "../api/api";
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
 
   const dispatch = useDispatch()
 
@@ -16,6 +18,7 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
+    setLoading(true)
     try {
       const response = await fetch (`${baseUrl}/auth/login`, {
         method: "POST",
@@ -35,11 +38,16 @@ const LoginPage = () => {
             token: loggedIn.token
           })
         )
+
         navigate("/")
       }
 
     } catch (err) {
+
       console.log("Login failed", err.message)
+    }finally {
+
+      setLoading(false)
     }
   }
 
@@ -61,7 +69,9 @@ const LoginPage = () => {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-          <button type="submit">LOG IN</button>
+          <button type="submit" disabled={loading}> {loading ? "Loading...Please wait" : "LOGIN"}</button>
+
+
         </form>
         <a href="/register">Don't have an account? Sign In Here</a>
       </div>

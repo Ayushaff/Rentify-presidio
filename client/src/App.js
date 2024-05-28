@@ -11,6 +11,7 @@ import PropertyList from "./pages/PropertyList";
 import ReservationList from "./pages/ReservationList";
 import CategoryPage from "./pages/CategoryPage";
 import SearchPage from "./pages/SearchPage";
+import UpdateListing from "./pages/UpdateListing";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/create-listing" element={<CreateListing />} />
           <Route path="/properties/:listingId" element={<ListingDetails />} />
+          <Route path="/update-listing/:listingId" element={<UpdateListing />} />
           <Route path="/properties/category/:category" element={<CategoryPage />} />
           <Route path="/properties/search/:search" element={<SearchPage />} />
           <Route path="/:userId/trips" element={<TripList />} />

@@ -10,17 +10,20 @@ import { baseUrl } from "../api/api";
 const Listings = () => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
-
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [currentPage, setCurrentPage] = useState(1);
+  const listingsPerPage = 3;
 
   const listings = useSelector((state) => state.listings);
-
+  // const user = useSelector((state) => state.user);
+  // const propertyList = user?.propertyList;
+  
   const getFeedListings = async () => {
     try {
       const response = await fetch(
         selectedCategory !== "All"
           ? `${baseUrl}/properties?category=${selectedCategory}`
-          : "${baseUrl}/properties",
+          : `${baseUrl}/properties`,
         {
           method: "GET",
         }
@@ -38,6 +41,19 @@ const Listings = () => {
     getFeedListings();
   }, [selectedCategory]);
 
+  const handleClickNext = () => {
+    setCurrentPage((prevPage) => prevPage + 1);
+  };
+
+  const handleClickPrev = () => {
+    setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
+  };
+
+  const currentListings = listings?.slice(
+    (currentPage - 1) * listingsPerPage,
+    currentPage * listingsPerPage
+  );
+
   return (
     <>
       <div className="category-list">
@@ -45,7 +61,10 @@ const Listings = () => {
           <div
             className={`category ${category.label === selectedCategory ? "selected" : ""}`}
             key={index}
-            onClick={() => setSelectedCategory(category.label)}
+            onClick={() => {
+              setSelectedCategory(category.label);
+              setCurrentPage(1);
+            }}
           >
             <div className="category_icon">{category.icon}</div>
             <p>{category.label}</p>
@@ -56,8 +75,10 @@ const Listings = () => {
       {loading ? (
         <Loader />
       ) : (
+        
         <div className="listings">
-          {listings.map(
+          {currentListings?.length>0 ? (
+            currentListings.map(
             ({
               _id,
               creator,
@@ -68,9 +89,10 @@ const Listings = () => {
               category,
               type,
               price,
-              booking=false
+              booking = false,
             }) => (
               <ListingCard
+                key={_id}
                 listingId={_id}
                 creator={creator}
                 listingPhotoPaths={listingPhotoPaths}
@@ -83,9 +105,25 @@ const Listings = () => {
                 booking={booking}
               />
             )
-          )}
-        </div>
-      )}
+          )
+        ) : (
+          <p>No more listings available.</p>
+        )}
+      </div>
+    )}
+      
+      <div className="pagination" style={{ display: "flex", justifyContent: "center" }}>
+        <button onClick={handleClickPrev} disabled={currentPage === 1} >
+          Previous
+        </button>
+        {currentPage}
+        <button
+          onClick={handleClickNext}
+          disabled={currentListings?.length < listingsPerPage}
+        >
+          Next
+        </button>
+      </div>
     </>
   );
 };

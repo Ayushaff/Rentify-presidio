@@ -134,5 +134,67 @@ router.get("/:listingId", async (req, res) => {
     res.status(404).json({ message: "Listing can not found!", error: err.message })
   }
 })
+/* UPDATE LISTING */
+router.put("/update/:listingId", upload.array("listingPhotos"), async (req, res) => {
+  try {
+    const { listingId } = req.params;
+
+    // Find the listing by ID
+    let listing = await Listing.findById(listingId);
+
+    if (!listing) {
+      return res.status(404).json({ message: "Listing not found" });
+    }
+
+    // Check if the user is the creator of the listing
+    if (listing.creator.toString() !== req.body.creator) {
+      return res.status(401).json({ message: "Unauthorized to update this listing" });
+    }
+
+    // Update listing details
+    const updatedListing = {
+      ...listing.toObject(),
+      ...req.body,
+    };
+
+    // Update listing photos if new ones are provided
+    if (req.files) {
+      updatedListing.listingPhotoPaths = req.files.map((file) => file.path);
+    }
+
+    // Save the updated listing
+    listing = await Listing.findByIdAndUpdate(listingId, updatedListing, { new: true });
+
+    res.status(200).json(listing);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to update listing", error: err.message });
+  }
+});
+
+/* DELETE LISTING */
+router.delete("/delete/:listingId", async (req, res) => {
+  try {
+    const { listingId } = req.params;
+
+    // Find the listing by ID
+    const listing = await Listing.findById(listingId);
+
+    if (!listing) {
+      return res.status(404).json({ message: "Listing not found" });
+    }
+
+    // Check if the user is the creator of the listing
+    if (listing.creator.toString() !== req.body.creator) {
+      return res.status(401).json({ message: "Unauthorized to delete this listing" });
+    }
+
+    // Delete the listing
+    await Listing.findByIdAndDelete(listingId);
+
+    res.status(200).json({ message: "Listing deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to delete listing", error: err.message });
+  }
+});
 
 module.exports = router

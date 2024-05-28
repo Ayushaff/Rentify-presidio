@@ -144,6 +144,8 @@ const CreateListing = () => {
       if (response.ok) {
         navigate("/");
         setListings([...listings, listingForm]);
+        console.log("Publish Listing success", listingForm);
+        console.log("Listings", listings);
         setError(null);
         setLoading(false);
       }

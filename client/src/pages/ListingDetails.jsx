@@ -9,25 +9,21 @@ import { DateRange } from "react-date-range";
 import Loader from "../components/Loader";
 import Navbar from "../components/Navbar";
 import { useSelector } from "react-redux";
-import Footer from "../components/Footer"
+import Footer from "../components/Footer";
 import { baseUrl } from "../api/api";
 
 const ListingDetails = () => {
   const [loading, setLoading] = useState(true);
   const user = useSelector((state) => state.user);
-  
 
   const { listingId } = useParams();
   const [listing, setListing] = useState(null);
 
   const getListingDetails = async () => {
     try {
-      const response = await fetch(
-        `${baseUrl}/properties/${listingId}`,
-        {
-          method: "GET",
-        }
-      );
+      const response = await fetch(`${baseUrl}/properties/${listingId}`, {
+        method: "GET",
+      });
 
       const data = await response.json();
       setListing(data);
@@ -41,8 +37,7 @@ const ListingDetails = () => {
     getListingDetails();
   }, []);
 
-  console.log(listing)
-
+  console.log(listing);
 
   /* BOOKING CALENDAR */
   const [dateRange, setDateRange] = useState([
@@ -63,9 +58,9 @@ const ListingDetails = () => {
   const dayCount = Math.round(end - start) / (1000 * 60 * 60 * 24); // Calculate the difference in day unit
 
   /* SUBMIT BOOKING */
-  const customerId = useSelector((state) => state?.user?._id)
+  const customerId = useSelector((state) => state?.user?._id);
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleSubmit = async () => {
     try {
@@ -76,30 +71,30 @@ const ListingDetails = () => {
         startDate: dateRange[0].startDate.toDateString(),
         endDate: dateRange[0].endDate.toDateString(),
         totalPrice: listing.price * dayCount,
-      }
+      };
 
       const response = await fetch(`${baseUrl}/bookings/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(bookingForm)
-      })
+        body: JSON.stringify(bookingForm),
+      });
 
       if (response.ok) {
-        navigate(`/${customerId}/trips`)
+        navigate(`/${customerId}/trips`);
       }
     } catch (err) {
-      console.log("Submit Booking Failed.", err.message)
+      console.log("Submit Booking Failed.", err.message);
     }
-  }
+  };
 
   return loading ? (
     <Loader />
   ) : (
     <>
       <Navbar />
-      
+
       <div className="listing-details">
         <div className="title">
           <h1>{listing.title}</h1>
@@ -140,7 +135,7 @@ const ListingDetails = () => {
 
         <h3>Description</h3>
         <p>{listing?.description}</p>
-      <hr />
+        <hr />
 
         <h3>{listing?.highlight}</h3>
         <p>{listing?.highlightDesc}</p>
@@ -163,37 +158,43 @@ const ListingDetails = () => {
               ))}
             </div>
           </div>
-        
+          {user?.role === "buyer" && (
+            <a href={`mailto:${listing?.creator?.email}`}>
+              <button className="button">Contact Host</button>
+            </a>
+          )}
 
+          {user?.role === "buyer" && (
+            <div>
+              <h2>How long do you want to stay?</h2>
+              <div className="date-range-calendar">
+                <DateRange ranges={dateRange} onChange={handleSelect} />
+                {dayCount > 1 ? (
+                  <h2>
+                    ${listing.price} x {dayCount} nights
+                  </h2>
+                ) : (
+                  <h2>
+                    ${listing.price} x {dayCount} night
+                  </h2>
+                )}
+
+                <h2>Total price: ${listing.price * dayCount}</h2>
+                <p>Start Date: {dateRange[0].startDate.toDateString()}</p>
+                <p>End Date: {dateRange[0].endDate.toDateString()}</p>
+
+                <button className="button" type="submit" onClick={handleSubmit}>
+                  BOOKING
+                </button>
+              </div>
+            </div>
+          )}
 
           {
-            user?.role==="buyer" &&
-          <div>
-
-            <h2>How long do you want to stay?</h2>
-            <div className="date-range-calendar">
-              <DateRange ranges={dateRange} onChange={handleSelect} />
-              {dayCount > 1 ? (
-                <h2>
-                  ${listing.price} x {dayCount} nights
-                </h2>
-              ) : (
-                <h2>
-                  ${listing.price} x {dayCount} night
-                </h2>
-              )}
-
-              <h2>Total price: ${listing.price * dayCount}</h2>
-              <p>Start Date: {dateRange[0].startDate.toDateString()}</p>
-              <p>End Date: {dateRange[0].endDate.toDateString()}</p>
-
-              <button className="button" type="submit" onClick={handleSubmit}>
-                BOOKING
-              </button>
-            </div>
-          </div>
-        }
-        
+            user.role === "seller" && (
+              <button onClick={() => navigate(`/update-listing/${listingId}` )} style={{width: "10%", height: "50px"}}>Update Listing</button>
+            )
+          }
         </div>
       </div>
 
