@@ -9,7 +9,7 @@ const listingRoutes = require("./routes/listing.js")
 const bookingRoutes = require("./routes/booking.js")
 const userRoutes = require("./routes/user.js")
 
-const allowedOrigins = ['http://localhost:3000', 'https://rentify-presidio-hi.vercel.app','https://rentify-presidio-one.vercel.app','https://rentify-presidio-1.onrender.com'];
+const allowedOrigins = ['http://localhost:3000', 'https://rentify-presidio-hi.vercel.app','https://rentify-presidio-one.vercel.app','http://54.66.154.238'];
 
 // Configure CORS options
 const corsOptions = {
